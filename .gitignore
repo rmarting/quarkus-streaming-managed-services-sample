@@ -1,0 +1,10 @@
+/target/
+.project
+.classpath
+.settings/
+.idea/
+*.iml
+.vscode/
+# rhoas configuration files
+event-bus-config.env
+event-bus-service-account.env

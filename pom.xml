@@ -1,0 +1,362 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.jromanmartin.kafka</groupId>
+    <artifactId>kafka-clients-quarkus-sample</artifactId>
+    <version>2.13.3-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-universe-bom</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.parameters>true</maven.compiler.parameters>
+        <compiler-plugin.version>3.8.1</compiler-plugin.version>
+        <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
+        <!-- Quarkus -->
+        <quarkus.platform.version>2.13.3.Final</quarkus.platform.version>
+        <!-- Avro -->
+        <avro.version>1.11.0</avro.version>
+        <!-- Apicurio Registry -->
+        <apicurio.version>2.3.1.Final</apicurio.version>
+        <apicurio.registry.url>${env.SERVICE_REGISTRY_URL}${env.SERVICE_REGISTRY_CORE_PATH}</apicurio.registry.url>
+        <!-- Red Hat Managed Services Endpoints -->
+        <rhoas.service-account.clientID>${env.RHOAS_SERVICE_ACCOUNT_CLIENT_ID}</rhoas.service-account.clientID>
+        <rhoas.service-account.clientSecret>${env.RHOAS_SERVICE_ACCOUNT_CLIENT_SECRET}</rhoas.service-account.clientSecret>
+        <rhoas.service-account.oauthTokenUrl>${env.RHOAS_SERVICE_ACCOUNT_OAUTH_TOKEN_URL}</rhoas.service-account.oauthTokenUrl>
+        <!-- JKube -->
+        <org.eclipse.jkube.version>1.9.1</org.eclipse.jkube.version>
+        <jkube.generator.name>${project.artifactId}:${project.version}</jkube.generator.name>
+    </properties>
+
+    <dependencies>
+        <!-- Quarkus Extensions -->
+        <!-- REST -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy-jsonb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy-jackson</artifactId>
+        </dependency>
+
+        <!-- Health Check -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-health</artifactId>
+        </dependency>
+
+        <!-- Open API -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-openapi</artifactId>
+        </dependency>
+
+        <!-- Kafka Clients -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-kafka-client</artifactId>
+        </dependency>
+        <!-- Reactive Messaging -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
+        </dependency>
+
+        <!-- Avro Schemas Dependency -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-avro</artifactId>
+        </dependency>
+
+        <!-- Apicurio Registry Avro Schemas Extension -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-apicurio-registry-avro</artifactId>
+        </dependency>
+
+        <!-- Apicurio Serializers/Deserializers -->
+        <dependency>
+            <groupId>io.apicurio</groupId>
+            <artifactId>apicurio-registry-serdes-avro-serde</artifactId>
+            <!--<version>${apicurio.version}</version>-->
+        </dependency>
+
+        <!-- Strimzi Kafka OAuth Client -->
+        <dependency>
+            <groupId>io.strimzi</groupId>
+            <artifactId>kafka-oauth-client</artifactId>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.reactive</groupId>
+            <artifactId>smallrye-reactive-messaging-in-memory</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>generate-code</goal>
+                            <goal>generate-code-tests</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${compiler-plugin.version}</version>
+                <configuration>
+                    <parameters>${maven.compiler.parameters}</parameters>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire-plugin.version}</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                        <maven.home>${maven.home}</maven.home>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>${surefire-plugin.version}</version>
+            </plugin>
+
+            <!-- Extending source resources to add generated classes by Quarkus Avro -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <!-- Added the generated source folder as source path to compile classes -->
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <!-- Output folder defined in generate phase -->
+                                <source>${project.build.directory}/generated-sources/avsc</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- Apicurio Registry -->
+        <profile>
+            <id>apicurio</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.apicurio</groupId>
+                        <artifactId>apicurio-registry-maven-plugin</artifactId>
+                        <version>${apicurio.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>register</goal>
+                                </goals>
+                                <configuration>
+                                    <registryUrl>${apicurio.registry.url}</registryUrl>
+                                    <authServerUrl>${rhoas.service-account.oauthTokenUrl}</authServerUrl>
+                                    <clientId>${rhoas.service-account.clientID}</clientId>
+                                    <clientSecret>${rhoas.service-account.clientSecret}</clientSecret>
+                                    <artifacts>
+                                        <!-- Schema definition for SimpleTopicIdStrategy strategy -->
+                                        <artifact>
+                                            <groupId>default</groupId>
+                                            <artifactId>messages</artifactId>
+                                            <version>2.0</version>
+                                            <type>AVRO</type>
+                                            <file>
+                                                ${project.basedir}/src/main/avro/message.avsc
+                                            </file>
+                                            <ifExists>RETURN_OR_UPDATE</ifExists>
+                                            <canonicalize>true</canonicalize>
+                                        </artifact>
+
+                                        <!-- Schema definition for TopicIdStrategy strategy -->
+                                        <artifact>
+                                            <groupId>default</groupId>
+                                            <artifactId>messages-value</artifactId>
+                                            <version>2.0</version>
+                                            <type>AVRO</type>
+                                            <file>
+                                                ${project.basedir}/src/main/avro/message.avsc
+                                            </file>
+                                            <ifExists>RETURN_OR_UPDATE</ifExists>
+                                            <canonicalize>true</canonicalize>
+                                        </artifact>
+
+                                        <!-- Schema definition for RecordIdStrategy strategy -->
+                                        <artifact>
+                                            <groupId>io.jromanmartin.kafka.schema.avro</groupId>
+                                            <artifactId>Message</artifactId>
+                                            <version>2.0</version>
+                                            <type>AVRO</type>
+                                            <file>
+                                                ${project.basedir}/src/main/avro/message.avsc
+                                            </file>
+                                            <ifExists>RETURN_OR_UPDATE</ifExists>
+                                            <canonicalize>true</canonicalize>
+                                        </artifact>
+                                    </artifacts>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- OpenShift Deployment -->
+        <profile>
+            <id>openshift</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.eclipse.jkube</groupId>
+                        <artifactId>openshift-maven-plugin</artifactId>
+                        <version>${org.eclipse.jkube.version}</version>
+                        <configuration>
+                            <resources>
+                                <!--
+                                    Guidelines for Labels and Annotations for OpenShift applications
+                                    https://github.com/redhat-developer/app-labels/blob/master/labels-annotation-for-openshift.adoc
+                                -->
+                                <labels>
+                                    <all>
+                                        <property>
+                                            <name>app.kubernetes.io/part-of</name>
+                                            <value>${project.groupId}</value>
+                                        </property>
+                                        <property>
+                                            <name>app.kubernetes.io/name</name>
+                                            <value>${project.artifactId}</value>
+                                        </property>
+                                        <property>
+                                            <name>app.kubernetes.io/component</name>
+                                            <value>backend</value>
+                                        </property>
+                                        <property>
+                                            <name>app.kubernetes.io/version</name>
+                                            <value>${project.version}</value>
+                                        </property>
+                                        <property>
+                                            <name>app.kubernetes.io/managed-by</name>
+                                            <value>jkube</value>
+                                        </property>
+                                        <property>
+                                            <name>app.openshift.io/runtime</name>
+                                            <value>quarkus</value>
+                                        </property>
+                                        <property>
+                                            <name>app.kubernetes.io/runtime-version</name>
+                                            <value>2.7.5.Final</value>
+                                        </property>
+                                    </all>
+                                </labels>
+                                <annotations>
+                                    <all>
+                                        <property>
+                                            <name>app.openshift.io/connects-to</name>
+                                            <value>service-registry,my-kafka</value>
+                                        </property>
+                                    </all>
+                                </annotations>
+                            </resources>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Quarkus Native Compilation -->
+        <profile>
+            <id>native</id>
+            <activation>
+                <property>
+                    <name>native</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${surefire-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                                <configuration>
+                                    <systemPropertyVariables>
+                                        <native.image.path>
+                                            ${project.build.directory}/${project.build.finalName}-runner
+                                        </native.image.path>
+                                        <java.util.logging.manager>
+                                            org.jboss.logmanager.LogManager
+                                        </java.util.logging.manager>
+                                        <maven.home>${maven.home}</maven.home>
+                                    </systemPropertyVariables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <quarkus.package.type>native</quarkus.package.type>
+            </properties>
+        </profile>
+    </profiles>
+</project>
