@@ -28,8 +28,6 @@
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
         <!-- Quarkus -->
         <quarkus.platform.version>2.13.3.Final</quarkus.platform.version>
-        <!-- Avro -->
-        <avro.version>1.11.0</avro.version>
         <!-- Apicurio Registry -->
         <apicurio.version>2.3.1.Final</apicurio.version>
         <apicurio.registry.url>${env.SERVICE_REGISTRY_URL}${env.SERVICE_REGISTRY_CORE_PATH}</apicurio.registry.url>
@@ -93,7 +91,6 @@
         <dependency>
             <groupId>io.apicurio</groupId>
             <artifactId>apicurio-registry-serdes-avro-serde</artifactId>
-            <!--<version>${apicurio.version}</version>-->
         </dependency>
 
         <!-- Strimzi Kafka OAuth Client -->
