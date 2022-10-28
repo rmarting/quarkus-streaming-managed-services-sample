@@ -335,9 +335,9 @@ and consume checked and valid messages using a schema declared. Congratulations!
 ## Cleaning Resources
 
 If you need to clean up your resources, then it is very easy using the same tools
-but not in this way:
+but now in this way:
 
-Undeploying our application:
+Undeploy our application:
 
 ```shell
 ./mvnw oc:undeploy -Popenshift -DskipTests
@@ -371,3 +371,4 @@ rhoas service-account delete -y \
 * [Connect to OpenShift application services with contexts](https://developers.redhat.com/articles/2022/07/18/simplify-client-connection-configurations-service-contexts#)
 * [Getting started with Red Hat OpenShift Streams for Apache Kafka](https://developers.redhat.com/articles/2021/07/07/getting-started-red-hat-openshift-streams-apache-kafka)
 * [Get started with OpenShift Service Registry](https://developers.redhat.com/articles/2021/10/04/get-started-openshift-service-registry)
+* [My own Red Hat OpenShift Application Services CLI Cheat Sheet](https://blog.jromanmartin.io/cheat-sheets/rhoas)
