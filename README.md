@@ -3,6 +3,17 @@
 This repo is an extended version of the original [one](https://github.com/rmarting/kafka-clients-quarkus-sample) focused
 in the integration with the streaming services provided by the Red Hat Openshift Application Services.
 
+⚠️⚠️ Red Hat OpenShift Streams for Apache Kafka no longer available ⚠️⚠️ 
+
+The [Red Hat OpenShift Streams for Apache Kafka](https://developers.redhat.com/products/red-hat-openshift-streams-for-apache-kafka/)
+and [Red Hat OpenShift Service Registry](https://developers.redhat.com/red-hat-openshift-apache-kafka-ecosystem/openshift-service-registry)
+services are no longer available as part of the Red Hat Developer Sandbox without cost.
+
+If you are interested to use these managed services (and follow this repository), please, contact with your local
+account or with us [here](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-streams-for-apache-kafka#contact)
+
+⚠️⚠️⚠️⚠️⚠️⚠️
+
 This repo integrates the following managed services:
 
 * [Red Hat Developer Sandbox](https://developers.redhat.com/developer-sandbox) provides
