@@ -1,8 +1,7 @@
 # Kafka Clients Quarkus Edition with Managed Services
 
 This repo is an extended version of the original [one](https://github.com/rmarting/kafka-clients-quarkus-sample) focused
-in the integration with the streaming services provided by the
-Red Hat Openshift Application Services.
+in the integration with the streaming services provided by the Red Hat Openshift Application Services.
 
 This repo integrates the following managed services:
 
@@ -36,8 +35,7 @@ But in 'native' mode, then the applications is a high-fast :rocket: starting in 
 2022-10-21 14:24:32,089 INFO [io.quarkus] (main) kafka-clients-quarkus-sample 2.13.3-SNAPSHOT native (powered by Quarkus 2.13.3.Final) started in 0.169s. Listening on: http://0.0.0.0:8080
 ```
 
-To deploy this application into OpenShift environment, we use the
-amazing [JKube](https://www.eclipse.org/jkube/).
+To deploy this application into OpenShift environment, we use the amazing [JKube](https://www.eclipse.org/jkube/).
 
 This application deployed in the Red Hat Developer Sandbox looks like this:
 
@@ -47,7 +45,7 @@ This application deployed in the Red Hat Developer Sandbox looks like this:
 
 The environment and services are provided by the different managed services by
 Red Hat. It is very easy to start there, you only require to have a Red Hat
-Developer account. You could sign [here](https://sso.redhat.com/auth/realms/redhat-external/login-actions/registration?client_id=rhd-web&tab_id=S1NAhgOLEmU).
+Developer account. You could sign [here](https://sso.redhat.com/auth/realms/redhat-external/login-actions/registration?client_id=rhd-web).
 
 Once you have your account created and ready, we need to install the
 Red Hat OpenShift Application Service CLI (`rhoas`) that will help to
@@ -58,7 +56,7 @@ This repo was tested with the following version:
 
 ```shell
 ❯ rhoas version
-rhoas version 0.51.4
+rhoas version 0.53.0
 ```
 
 So, we are now ready to log in into the Red Hat OpenShift Application Services:
@@ -66,6 +64,17 @@ So, we are now ready to log in into the Red Hat OpenShift Application Services:
 ```shell
 rhoas login
 ```
+
+And, finally, we need to log into our [Red Hat OpenShift Sandbox environment](https://developers.redhat.com/developer-sandbox).
+In the right side of the navigator bar our username is displayed, clicking on it, we can see the `Copy login command`
+option. This option will show us a `oc` command to login into our Red Hat OpenShift Sandbox from a terminal. We copy
+and paste that command into our terminal (similar to):
+
+```shell
+oc login --token=<TOKEN> --server=https://api.<SANDBOX>.openshiftapps.com:6443
+```
+
+Now, we are ready to deploy our managed services.
 
 ### Deploying Apache Kafka
 
@@ -82,7 +91,12 @@ we could verify the status with:
 rhoas status kafka
 ```
 
-The `Status` property must be `ready` before continuing these instructions.
+The `Status` property must be `ready` before continuing these instructions. This simple command can
+check the provision status:
+
+```shell
+until ready=$(rhoas status kafka -o json | jq .kafka.status) && [ "$ready" == "\"ready\"" ]; do echo "Kafka not ready"; sleep 10; done; echo "Kafka ready"
+```
 
 Next step is to create the Kafka Topic used by our application:
 
@@ -96,6 +110,20 @@ This command will create our own instance of Apache Kafka easily:
 
 ```shell
 rhoas service-registry create --name event-bus-service-registry --use
+```
+
+The `Status` property must be `ready` before continuing these instructions. This simple command can
+check the provision status:
+
+```shell
+until ready=$(rhoas status service-registry -o json | jq .registry.status) && [ "$ready" == "\"ready\"" ]; do echo "Service Registry not ready"; sleep 10; done; echo "Service Registry ready"
+```
+
+Your instance of the Service Registry provides an user interface available to manage the artifacts. This command
+shows the url to be used by a browser:
+
+```shell
+rhoas service-registry describe -o json | jq .browserUrl
 ```
 
 ### Getting Configuration Context
@@ -136,12 +164,25 @@ To create a Service Account:
 rhoas service-account create \
   --short-description event-bus-service-account \
   --file-format env \
-  --output-file=./event-bus-service-account.env --overwrite
+  --overwrite \
+  --output-file=./event-bus-service-account.env
 ```
 
 **NOTE**: The output of that command includes a set of instructions to execute
 to grant our service account to the different services created. It is
 important to follow them.
+
+One of the commands is to grant full access to produce and consume Kafka messages:
+
+```shell
+rhoas kafka acl grant-access --producer --consumer --service-account <SERVICE_ID> --topic all --group all
+```
+
+Other command is to grant read and write access to the currently selected Service Registry instance, enter this command:
+
+```shell
+rhoas service-registry role add --role=manager --service-account <SERVICE_ID>
+```
 
 The `event-bus-service-account.env` file will contain the right values of our
 instances using the following environment variables:
